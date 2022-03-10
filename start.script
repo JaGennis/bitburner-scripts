@@ -1,0 +1,12 @@
+ram = 2
+toStart = "hacknet"
+toStartScript = toStart + ".js"
+
+while (getScriptRam(toStartScript) > ram)
+	ram *= 2
+
+newServer = purchaseServer(toStart, ram)
+scp(toStartScript, newServer)
+exec(toStartScript, newServer)
+
+spawn("propagate.js")

@@ -1,0 +1,36 @@
+server = args[0];
+print(server)
+security = getServerSecurityLevel(server);
+minSecurity = getServerMinSecurityLevel(server);
+money = getServerMoneyAvailable(server);
+maxMoney = getServerMaxMoney(server);
+processes = ps(getHostname());
+
+for (i = 0; i < processes.length; ++i) {
+	if (processes[i].filename == getScriptName())
+		threads = processes[i].threads;
+}
+
+print("Running with " + threads + " threads");
+
+while (money < maxMoney) {
+
+	print("Security: " + security + " out of " + minSecurity);
+	print("Money: " + money + " out of " + maxMoney);
+
+	if (security - minSecurity > (0.05 * threads)) {
+		weaken(server);
+	}
+	else if (money < maxMoney) {
+		grow(server);
+	}
+
+	money = getServerMoneyAvailable(server)
+	security = getServerSecurityLevel(server)
+}
+
+while (security > minSecurity + 0.1) {
+	weaken(server)
+	print("Security: " + security + " out of " + minSecurity);
+	security = getServerSecurityLevel(server)
+}
