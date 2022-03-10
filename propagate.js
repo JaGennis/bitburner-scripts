@@ -72,7 +72,7 @@ export async function main(ns) {
 				}
 
 				if(ns.hasRootAccess(allServers[i])) {
-					var threads = getAvailThreads(ns, "stabilize.script", allServers[i])
+					var threads = getAvailThreads(ns, "stabilize.script", ns.getHostname())
 					ns.run("stabilize.script", threads, allServers[i])
 					
 					while (ns.scriptRunning("stabilize.script", ns.getHostname()))
