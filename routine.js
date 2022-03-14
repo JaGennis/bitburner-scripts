@@ -50,6 +50,8 @@ export async function main(ns) {
             }
         }
 
+        var crimeFactions = ["Slum Snakes","Tetrads","Silhouette","Speakers for the Dead","The Dark Army","The Syndicate"]
+
         var invitations = ns.checkFactionInvitations()
         for (var i = 0; i < invitations.length; i++)
             join(invitations[i])
