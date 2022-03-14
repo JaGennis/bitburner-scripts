@@ -37,6 +37,7 @@ export async function main(ns) {
 				lowestCores = ns.hacknet.getNodeStats(i).cores;
 				lowestCoresInd = i;
 			}
+            await ns.sleep(10)
 		}
 
 		var lowestLevelCost = ns.hacknet.getLevelUpgradeCost(lowestLevelInd, 10);
