@@ -1,26 +1,15 @@
-import Data.List          ( dropWhileEnd )
+import Control.Parallel.Strategies
+import Data.List ( subsequences )
 import System.Environment ( getArgs )
 
-buySell :: [Int] -> Int -> (Int, Int) -> Int
-buySell prices balance (buyDay, sellDay) = balance - (prices !! buyDay)
-                                                   + (prices !! sellDay)
+buySell' :: [Int] -> Int
+buySell' [] = 0
+buySell' l = (negate . head) l + (l !! 1) + buySell' (drop 2 l)
 
-makeNPairs :: Ord a => [a] -> Int -> a -> [[(a,a)]]
-makeNPairs l 0 min = [[]]
-makeNPairs l n min = [(x,y):z | x <- l, x >= min,
-                                y <- l, y >= x,
-                                z <- makeNPairs l (n-1) y]
-
-makeNDistinctPairs :: Ord a => [a] -> Int -> a -> [[(a,a)]]
-makeNDistinctPairs l 0 min = [[]]
-makeNDistinctPairs l n min = [(x,y):z | x <- l, x > min,
-                                        y <- l, y > x,
-                                        z <- makeNDistinctPairs l (n-1) y]
-
-main :: IO ()
 main = do
-    maxTrans <- read . head <$> getArgs
-    prices <- read . (!! 1) <$> getArgs
-    let days     = [0..(length prices - 1)]
-        trans    = if maxTrans == -1 then [1..div (length prices) 2] else [maxTrans]
-    print $ maximum $ concat $ (map.map) (foldl (buySell prices) 0) $ map (\x -> makeNDistinctPairs days x (-1)) trans
+    trans' <- read .  head  <$> getArgs
+    stocks <- read . (!! 1) <$> getArgs
+    let trans = if trans' == -1 then div (length stocks) 2 else trans'
+    let profits = map buySell' $ filter (\x -> length x <= trans * 2 && (even . length) x) $ subsequences stocks
+    print $ maximum (profits `using` parBuffer 8192 rdeepseq)
+
