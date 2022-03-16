@@ -16,4 +16,4 @@ move dims@(x,y) path = if last path == dims
 main :: IO ()
 main = do
     dims <- read . head <$> getArgs
-    print $ move dims (return (1,1))
+    print $ length $ move dims (return (1,1))
