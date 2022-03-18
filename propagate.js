@@ -1,3 +1,4 @@
+/** @param {NS} ns **/
 import { getAvailHacks, getAvailThreads, getAllServers } from "helper-functions.js";
 
 export async function main(ns) {
