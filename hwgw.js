@@ -23,10 +23,18 @@ export async function main(ns) {
 			return ns.getServerMaxRam(server) - ns.getServerUsedRam(server)
 		}
 
-		// ns.print(getAllServers(ns).sort(function (a, b) { return getFreeRam(b) - getFreeRam(a)}).map(item => getFreeRam(item)))
-		var biggestServer = getAllServers(ns).sort(function (a, b) { return getFreeRam(b) - getFreeRam(a)})[0]
+		var biggestServer = getAllServers(ns)
+			.filter(item => ns.hasRootAccess(item)
+						&& !ns.scriptRunning("/hwgw/weaken2.js", item)
+						&& item !== "home")
+			.sort(function (a, b) { return getFreeRam(b) - getFreeRam(a)})[0]
 
 		ns.print("Biggest Server: " + biggestServer + " with " + getFreeRam(biggestServer) + " RAM")
+
+		await ns.scp(metaHack.script, biggestServer)
+		await ns.scp(metaWeak.script, biggestServer)
+		await ns.scp(metaGrow.script, biggestServer)
+		await ns.scp(metaWeak2.script, biggestServer)
 
 		var cores = ns.getServer(biggestServer).cores
 
@@ -48,7 +56,7 @@ export async function main(ns) {
 			var newHackThreads = metaHack.threads + 1
 
 			if (stolenPercent >= 0.99 ||
-				ns.getScriptRam(metaHack.script) * newHackThreads 
+				ns.getScriptRam(metaHack.script) * newHackThreads
 				+ ns.getScriptRam(metaWeak.script) * newWeakenThreads
 				+ ns.getScriptRam(metaGrow.script) * newGrowThreads
 				+ ns.getScriptRam(metaWeak2.script) * newWeaken2Threads
