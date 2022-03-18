@@ -32,7 +32,7 @@ export async function main(ns) {
 		for (var i = 0; i < allServers.length; i++) {
 
 			if (ns.getServerMaxRam(allServers[i]) <= 0) {
-				ns.print("Server " + " has only " + ns.getServerMaxRam(allServers[i]) + " RAM!")
+				ns.print("Server " + allServers[i] + " has only " + ns.getServerMaxRam(allServers[i]) + " RAM!")
 				toRemove.push(i);
 			}
 			else if (ns.getServerRequiredHackingLevel(allServers[i]) > ns.getHackingLevel())
@@ -61,12 +61,12 @@ export async function main(ns) {
 						ns.print("Stabilize " + allServers[i] + " with " + threads + " threads")
 						await ns.scp("stabilize.script", "stabilize")
 						ns.exec("stabilize.script", "stabilize", threads, allServers[i])
-	
+
 						while (ns.scriptRunning("stabilize.script", "stabilize"))
 							await ns.sleep(1000);
-	
+
 						ns.print("Stabilized " + allServers[i] + " with " + threads + " threads")
-	
+
 						var serverThreads = getAvailThreads(ns, "selfsubstain.script", allServers[i])
 						ns.print("Starting hwgw.js for " + allServers[i])
 						ns.run("hwgw.js", 1, allServers[i])
