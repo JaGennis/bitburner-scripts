@@ -41,8 +41,8 @@ export async function main(ns) {
 			await ns.sleep(1000)
 
 		metaWeak.threads = 1
-
-		// await ns.sleep(500)
+		
+		await ns.sleep(500)
 	}
 
 	while (ns.getServerMaxMoney(ns.args[0]) > ns.getServerMoneyAvailable(ns.args[0])) {

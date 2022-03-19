@@ -86,6 +86,5 @@ export async function main(ns) {
 		}
 
 		ns.print(allServers)
-		await ns.sleep(1000)
 	}
 }
