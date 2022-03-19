@@ -25,13 +25,12 @@ export async function main(ns) {
 
 		var newWeakenThreads = metaWeak.threads
 
-		while (ns.getServerSecurityLevel(ns.args[0]) - ns.weakenAnalyze(metaWeak.threads, cores) 
+		while (ns.getServerSecurityLevel(ns.args[0]) - ns.weakenAnalyze(metaWeak.threads, cores)
 				> ns.getServerMinSecurityLevel(ns.args[0])){
 			newWeakenThreads++
-			if (ns.getScriptRam(metaWeak.script) * newWeakenThreads
-				+ ns.getScriptRam(metaGrow.script) * newGrowThreads
-				> getFreeRam(ns.getHostname()))
+			if (ns.getScriptRam(metaWeak.script) * newWeakenThreads > getFreeRam(ns.getHostname())) {
 				break
+			}
 			else {
 				metaWeak.threads = newWeakenThreads
 			}
@@ -42,6 +41,8 @@ export async function main(ns) {
 			await ns.sleep(1000)
 
 		metaWeak.threads = 1
+
+		// await ns.sleep(500)
 	}
 
 	while (ns.getServerMaxMoney(ns.args[0]) > ns.getServerMoneyAvailable(ns.args[0])) {
