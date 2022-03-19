@@ -46,6 +46,9 @@ export async function main(ns) {
 	}
 
 	while (ns.getServerMaxMoney(ns.args[0]) > ns.getServerMoneyAvailable(ns.args[0])) {
+		metaWeak = { time: ns.getWeakenTime(ns.args[0]), threads: 1, script: "/hwgw/weaken.js" }
+		metaGrow = { time: ns.getGrowTime(ns.args[0]) + delay, threads: 1, script: "/hwgw/grow.js" }
+
 		var percentNeeded = 1 / (ns.getServerMoneyAvailable(ns.args[0]) / ns.getServerMaxMoney(ns.args[0]))
 		while (metaGrow.threads < ns.growthAnalyze(ns.args[0], percentNeeded, cores)) {
 			var newGrowThreads = metaGrow.threads + 1
