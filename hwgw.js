@@ -40,20 +40,20 @@ export async function main(ns) {
 
 		while (true) {
 
-			var hackSecIncrease = ns.hackAnalyzeSecurity(metaHack.threads)
+			var newHackThreads = metaHack.threads + 1
+
+			var hackSecIncrease = ns.hackAnalyzeSecurity(newHackThreads)
 			var newWeakenThreads = metaWeak.threads
 			while (hackSecIncrease - ns.weakenAnalyze(newWeakenThreads, cores) > 0)
 				newWeakenThreads++
 
 			var stolenPercent = ns.hackAnalyze(ns.args[0]) * metaHack.threads
 			var newGrowThreads = Math.ceil(ns.growthAnalyze(ns.args[0], 1 / (1 - stolenPercent), cores))
-			var growSecIncrease = ns.growthAnalyzeSecurity(newGrowThreads)
 
+			var growSecIncrease = ns.growthAnalyzeSecurity(newGrowThreads)
 			var newWeaken2Threads = metaWeak2.threads
 			while (growSecIncrease - ns.weakenAnalyze(newWeaken2Threads, cores) > 0)
 				newWeaken2Threads++
-
-			var newHackThreads = metaHack.threads + 1
 
 			if (stolenPercent >= 0.99 ||
 				ns.getScriptRam(metaHack.script) * newHackThreads

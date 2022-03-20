@@ -53,17 +53,21 @@ export async function main(ns) {
 				if (ns.hasRootAccess(allServers[i])) {
 
 					if (ns.getServerMaxMoney(allServers[i]) > 0) {
-						var threads = getAvailThreads(ns, "stabilize.script", "stabilize")
+						// var threads = getAvailThreads(ns, "stabilize.script", "stabilize")
+						var threads = getAvailThreads(ns, "stabilize.js", ns.getHostname())
+						threads = 1
 						ns.print("Stabilize " + allServers[i] + " with " + threads + " threads")
-						await ns.scp("stabilize.script", "stabilize")
-						ns.exec("stabilize.script", "stabilize", threads, allServers[i])
+						// await ns.scp("stabilize.script", "stabilize")
+						// ns.exec("stabilize.script", "stabilize", threads, allServers[i])
+						ns.run("stabilize.js", threads, allServers[i])
 
-						while (ns.scriptRunning("stabilize.script", "stabilize"))
+						// while (ns.scriptRunning("stabilize.script", "stabilize"))
+						// while (ns.isRunning("stabilize.script"))
+						while (ns.scriptRunning("stabilize.js", ns.getHostname()))
 							await ns.sleep(1000);
 
 						ns.print("Stabilized " + allServers[i] + " with " + threads + " threads")
 
-						var serverThreads = getAvailThreads(ns, "selfsubstain.script", allServers[i])
 						ns.print("Starting hwgw.js for " + allServers[i])
 						ns.run("hwgw.js", 1, allServers[i])
 					}
@@ -80,6 +84,5 @@ export async function main(ns) {
 		}
 
 		ns.print(allServers)
-		await ns.sleep(1000)
 	}
 }
