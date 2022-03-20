@@ -31,11 +31,7 @@ export async function main(ns) {
 
 		for (var i = 0; i < allServers.length; i++) {
 
-			if (ns.getServerMaxRam(allServers[i]) <= 0) {
-				ns.print("Server " + allServers[i] + " has only " + ns.getServerMaxRam(allServers[i]) + " RAM!")
-				toRemove.push(i);
-			}
-			else if (ns.getServerRequiredHackingLevel(allServers[i]) > ns.getHackingLevel())
+			if (ns.getServerRequiredHackingLevel(allServers[i]) > ns.getHackingLevel())
 				ns.print("Server " + allServers[i] + " hacking level is too high!")
 			else if (ns.isRunning("hwgw.js", ns.getHostname(), allServers[i])) {
 				ns.print("hwgw.js already running for the server " + allServers[i])
@@ -71,6 +67,8 @@ export async function main(ns) {
 						ns.print("Starting hwgw.js for " + allServers[i])
 						ns.run("hwgw.js", 1, allServers[i])
 					}
+                    else
+                        ns.print("Server " + allServers[i] + " has only " + ns.getServerMaxMoney(allServers[i]) + " money")
 					toRemove.push(i);
 				}
 			}
