@@ -1,3 +1,4 @@
+#!/usr/bin/env runhaskell
 -- TODO: Remove "" from output, rename variables
 import System.Environment ( getArgs )
 import Data.List ( intercalate )

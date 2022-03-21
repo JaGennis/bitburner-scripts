@@ -1,3 +1,4 @@
+#!/usr/bin/env runhaskell
 import Data.List ( inits )
 import System.Environment ( getArgs )
 

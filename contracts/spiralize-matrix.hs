@@ -1,3 +1,4 @@
+#!/usr/bin/env runhaskell
 import System.Environment ( getArgs )
 
 trim = filter (\x -> x /= ' ')

@@ -1,3 +1,4 @@
+#!/usr/bin/env runhaskell
 import Control.Arrow      ( (&&&), first )
 import Data.Bool          ( bool )
 import Data.List          ( subsequences )
