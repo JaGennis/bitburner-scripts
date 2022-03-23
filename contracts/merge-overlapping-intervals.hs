@@ -8,11 +8,11 @@ containsAny [] _ = False
 containsAny _ [] = False
 containsAny search (x:xs) = elem x search || containsAny search xs
 
-unfoldIntervall :: Enum a => [[a]] -> [[a]]
-unfoldIntervall = map (\[x,y] -> [x..y])
+unfoldInterval :: Enum a => [[a]] -> [[a]]
+unfoldInterval = map (\[x,y] -> [x..y])
 
-foldIntervall :: [[a]] -> [[a]]
-foldIntervall = map (\x -> [head x, last x])
+foldInterval :: [[a]] -> [[a]]
+foldInterval = map (\x -> [head x, last x])
 
 merge :: Eq a => [[a]] -> [[a]]
 --merge []  = []
@@ -26,4 +26,4 @@ fixpoint f x = if f x == x then x else f (f x)
 
 main = do
     intervalls <- read @[[Int]] . head <$> getArgs
-    print . foldIntervall . fixpoint merge . sort . unfoldIntervall $ intervalls
+    print . foldInterval . fixpoint merge . sort . unfoldInterval $ intervalls
