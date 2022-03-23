@@ -19,8 +19,8 @@ permutateOrder elements = map (\x -> consume x elements) (nub $ concatMap permut
 mathOps = ['+', '-', '*']
 
 rofl :: [Char] -> String -> [Int] -> [String]
-rofl ops str [] = []
-rofl ops str [x] = [str ++ show x]
+rofl ops str [] = [str]
+rofl ops "" [x] = [show x]
 rofl ops "" (x:xs:xss) = concatMap (\f -> rofl ops (show x ++ [f] ++ show xs) xss) ops
 rofl ops str (x:xs) = concatMap (\f -> rofl ops (str ++ [f] ++ show x) xs) ops
 
@@ -51,7 +51,5 @@ eval str
 
 main = do
     (digits, _:target) <- break (==',') . filter (\x -> x /= '[' && x /= ']' && x /= '"') . head <$> getArgs
-    --let calcs = concatMap (rofl mathOps "" . map read) $ permutateOrder digits
     let calcs = concatMap (rofl mathOps "" . map read) $ permutateOrder digits
     putStrLn $ filter (/= '"') $ show $ map (calcs !!) $ elemIndices (read target) $ map (eval.lexer) calcs
-    --putStrLn $ filter (/= '"') $ show $ map (calcs !!) $ first (elemIndices (read target) $ map (eval.lexer)) (calcs,calcs)
