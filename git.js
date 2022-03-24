@@ -7,6 +7,7 @@ export async function main(ns) {
 	await ns.wget("https://raw.githubusercontent.com/JaGennis/bitburner-scripts/main/stabilize.js", "stabilize.js")
 	await ns.wget("https://raw.githubusercontent.com/JaGennis/bitburner-scripts/main/upgrade.js", "upgrade.js")
 	await ns.wget("https://raw.githubusercontent.com/JaGennis/bitburner-scripts/main/contracts.js", "contracts.js")
+	await ns.wget("https://raw.githubusercontent.com/JaGennis/bitburner-scripts/main/backdoor.js", "backdoor.js")
 
 	await ns.wget("https://raw.githubusercontent.com/JaGennis/bitburner-scripts/main/hwgw.js", "hwgw.js")
 	await ns.wget("https://raw.githubusercontent.com/JaGennis/bitburner-scripts/main/hwgw/hack.js", "/hwgw/hack.js")
