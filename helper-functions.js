@@ -1,5 +1,19 @@
 /** @param {NS} ns **/
 
+export function root(ns, server) {
+	if (ns.fileExists("BruteSSH.exe"))
+		ns.brutessh(server)
+	if (ns.fileExists("FTPCrack.exe"))
+		ns.ftpcrack(server)
+	if (ns.fileExists("relaySMTP.exe"))
+		ns.relaysmtp(server)
+	if (ns.fileExists("HTTPWorm.exe"))
+		ns.httpworm(server)
+	if (ns.fileExists("SQLInject.exe"))
+		ns.sqlinject(server)
+	ns.nuke(server)
+}
+
 export function getAvailThreads(ns, script, server) {
 	var availRam = ns.getServerMaxRam(server) - ns.getServerUsedRam(server)
 	return availRam / ns.getScriptRam(script)
