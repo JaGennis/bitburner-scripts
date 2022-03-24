@@ -19,7 +19,6 @@ export async function main(ns) {
 		if (ns.fileExists("SQLInject.exe"))
 			ns.sqlinject(server)
 		ns.nuke(server)
-		await ns.installBackdoor(server)
 	}
 
 	var allServers = getAllServers(ns).slice(1).filter(item => !ns.getPurchasedServers().includes(item))
