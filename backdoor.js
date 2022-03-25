@@ -5,11 +5,11 @@ export async function main(ns) {
 	var allServers = []
 
 	async function recurBackdoor(home) {
-		if (!ns.hasRootAccess(home)) {
+		if (!ns.hasRootAccess(home))
 			root(ns, home)
-			if (!ns.getServer(home).backdoorInstalled)
-				await ns.installBackdoor()
-		}
+		if (!ns.getServer(home).backdoorInstalled 
+			&& ns.getServerRequiredHackingLevel(home) <= ns.getHackingLevel())
+			await ns.installBackdoor()
 		var nearServers = ns.scan(home)
 		for (var i = 0; i < nearServers.length; i++)
 			if (!allServers.includes(nearServers[i])
