@@ -33,7 +33,8 @@ maxProfit n pl = maximum $ map (negate. sum . map (uncurry (-)) . fst) $ concatM
     where w = [1..n]
 
 main = do
-    trans  <- read . head <$> getArgs
-    stocks <- read . last <$> getArgs
-    print $ maxProfit trans stocks
-    --print $ buildNbsPairs trans stocks
+    input <- getArgs
+    let ast [trans, stocks] = (read trans,read . ("[" ++ ) . (++ "]") $ stocks)
+    let ast4 [x] = (read . takeWhile isDigit . tail $ x, read . tail . dropWhile isDigit . init . tail $ x)
+    let transStockPair = (if (head . head $ input) == '[' then ast4 else ast) input
+    print $ uncurry maxProfit transStockPair
