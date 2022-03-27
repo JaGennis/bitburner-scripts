@@ -54,31 +54,57 @@ export async function main(ns) {
 	}
 
 	async function faction() {
+
+		function focus() {
+			return !ns.getOwnedAugmentations().includes("Neuroreceptor Management Implant")
+		}
+
+		function repNeededForFavor(favor) {
+			return Math.pow(1.02, (favor - 1)) * 25500 - 25000
+		}
+
+		var invitations = ns.checkFactionInvitations()
+		for (var i = 0; i < invitations.length; i++) {
+			var factionAugs = ns.getAugmentationsFromFaction(invitations[i])
+			var ownedAugs = ns.getOwnedAugmentations()
+			var unownedAugs = factionAugs.filter(aug => !ownedAugs.includes(aug))
+			if (unownedAugs.length > 0)
+				ns.joinFaction(invitations[i])
+		}
+
 		var cityFactions = ["Sector-12", "Chongqing", "New Tokyo", "Ishima", "Aevum", "Volhaven"]
-        for(var i = 0; i < cityFactions.length; i++){
-            var facAugs = (ns.getAugmentationsFromFaction(cityFactions[i]).filter(n => !ns.getOwnedAugmentations().includes(n)))
-            if(facAugs.length > 0){
-                ns.travelToCity(cityFactions[i])
-                break
-            }
-        }
+		for (var i = 0; i < cityFactions.length; i++) {
+			var facAugs = (ns.getAugmentationsFromFaction(cityFactions[i])
+				.filter(aug => !ns.getOwnedAugmentations().includes(aug)))
+			if (facAugs.length > 0) {
+				ns.travelToCity(cityFactions[i])
+				break
+			}
+		}
 
-        var crimeFactions = ["Slum Snakes","Tetrads","Silhouette","Speakers for the Dead","The Dark Army","The Syndicate"]
+		var crimeFactions = ["Slum Snakes", "Tetrads", "Silhouette", "Speakers for the Dead", "The Dark Army", "The Syndicate"]
 
-        var invitations = ns.checkFactionInvitations()
-        for (var i = 0; i < invitations.length; i++)
-            join(invitations[i])
+		var playerFactions = ns.getPlayer().factions
+		for (var i = 0; i < playerFactions.length; i++) {
+			var maxRep = Math.max(...ns.getAugmentationsFromFaction(playerFactions[i])
+				.map(aug => ns.getAugmentationRepReq(aug)))
+			if (maxRep > repNeededForFavor(150) + 100000 && ns.getFactionFavor(playerFactions[i]) < 150)
+				var targetRep = repNeededForFavor(150)
+			else
+				var targetRep = maxRep
+			while (ns.getFactionRep(playerFactions[i]) < targetRep) {
+				if (ns.workForFaction(playerFactions[i], "Hacking Contracts", focus()))
+					await ns.sleep(10000)
+				else if (ns.workForFaction(playerFactions[i], "Field Work", focus()))
+					await ns.sleep(10000)
+				else if (ns.workForFaction(playerFactions[i], "Security Work", focus()))
+					await ns.sleep(10000)
+				else
+					break
+			}
+		}
 
-        var allFactions = ns.getPlayer().factions
-        for (var i = 0; i < allFactions.length; i++) {
-            var facAugs = (ns.getAugmentationsFromFaction(allFactions[i]).filter(n => !ns.getOwnedAugmentations().includes(n)))
-            if(facAugs.length > 0) {
-                while(ns.getFactionRep(allFactions[i]) < facAugs.max()) {
-                    //ns.workForFaction(allFactions[i], )
-                    await ns.sleep(5000)
-                }
-            }
-        }
+		// var bestFactions = ["Bachman...", "Fulcrum"]
 	}
 
 	while (true) {
