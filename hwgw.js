@@ -55,7 +55,7 @@ export async function main(ns) {
 			while (growSecIncrease - ns.weakenAnalyze(newWeaken2Threads, cores) > 0)
 				newWeaken2Threads++
 
-			if (stolenPercent >= 0.99 ||
+			if (stolenPercent >= 0.95 ||
 				ns.getScriptRam(metaHack.script) * newHackThreads
 				+ ns.getScriptRam(metaWeak.script) * newWeakenThreads
 				+ ns.getScriptRam(metaGrow.script) * newGrowThreads
