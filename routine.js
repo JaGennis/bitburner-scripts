@@ -7,16 +7,17 @@ export async function main(ns) {
 			return ns.getCrimeStats(crime).money * ns.getCrimeChance(crime) / ns.getCrimeStats(crime).time
 		}
 
-        function expPerSec(crime) {
-            var sumExp = ns.getCrimeStats(crime).charisma_exp + ns.getCrimeStats(crime).defense_exp + ns.getCrimeStats(crime).dexterity_exp
-            return (sumExp * ns.getCrimeChance(crime) + (sumExp / 2) * (1 - ns.getCrimeChance(crime))) / ns.getCrimeStats(crime).time
-        }
+		function expPerSec(crime) {
+			var sumExp = ns.getCrimeStats(crime).charisma_exp + ns.getCrimeStats(crime).defense_exp + ns.getCrimeStats(crime).dexterity_exp
+			return (sumExp * ns.getCrimeChance(crime) + (sumExp / 2) * (1 - ns.getCrimeChance(crime))) / ns.getCrimeStats(crime).time
+		}
 
 		// var crimes = ["Shoplift", "Rob store", "Mug someone", "Larceny", "Deal Drugs", "Bond Forgery"
-	    //		, "Traffick illegal Arms", "Homicide", "Grand theft Auto", "Kidnap and Ransom"
-	    //		, "Assassinate", "Heist"]
+		//		, "Traffick illegal Arms", "Homicide", "Grand theft Auto", "Kidnap and Ransom"
+		//		, "Assassinate", "Heist"]
 
-		var crimes = ["Traffick illegal Arms", "Grand theft Auto", "Kidnap and Ransom" , "Heist"]
+		var crimes = ["Assassination"]
+		// var crimes = ["Shoplift"]
 
 		var bestCrime = crimes[0]
 
@@ -108,8 +109,8 @@ export async function main(ns) {
 	}
 
 	while (true) {
-        await program()
-		// await faction()
+		await program()
+		await faction()
 		await crime()
 	}
 }
