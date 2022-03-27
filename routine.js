@@ -88,8 +88,9 @@ export async function main(ns) {
 		var playerFactions = ns.getPlayer().factions
 		for (var i = 0; i < playerFactions.length; i++) {
 			var maxRep = Math.max(...ns.getAugmentationsFromFaction(playerFactions[i])
+				.filter(aug => !ns.getOwnedAugmentations().includes(aug))
 				.map(aug => ns.getAugmentationRepReq(aug)))
-			if (maxRep > repNeededForFavor(150) + 100000 && ns.getFactionFavor(playerFactions[i]) < 150)
+			if (maxRep > repNeededForFavor(150) + 110000 && ns.getFactionFavor(playerFactions[i]) < 150)
 				var targetRep = repNeededForFavor(150)
 			else
 				var targetRep = maxRep
