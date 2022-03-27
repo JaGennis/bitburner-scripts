@@ -30,12 +30,25 @@ export async function main(ns) {
 
 	async function program() {
 		var programs = ["BruteSSH.exe", "FTPCrack.exe", "relaySMTP.exe", "HTTPWorm.exe", "SQLInject.exe",
-						"DeepscanV1.exe", "DeepscanV2.exe", "ServerProfiler.exe", "AutoLink.exe"]
-		var levels   = [50,100,250,500,750,75,400,75,25]
-		for(var i = 0; i < programs.length; i++)
-			if(!ns.fileExists(programs[i]) && ns.getHackingLevel() >= levels[i]){
-				ns.createProgram(programs[i])
-				while(ns.isBusy())
+			"DeepscanV1.exe", "DeepscanV2.exe", "ServerProfiler.exe", "AutoLink.exe"]
+		var levels = [50, 100, 250, 500, 750, 75, 400, 75, 25]
+
+		if (ns.getServerMoneyAvailable("home") >= 200000 && !ns.getPlayer().tor)
+			ns.purchaseTor()
+
+		if (ns.getPlayer().tor) {
+			for (var i = 0; i < ns.getDarkwebPrograms().length; i++) {
+				var programCost = ns.getDarkwebProgramCost(ns.getDarkwebPrograms()[i])
+				if (!ns.fileExists(ns.getDarkwebPrograms()[i]) && programCost <= ns.getServerMoneyAvailable("home")) {
+					ns.purchaseProgram(ns.getDarkwebPrograms()[i])
+				}
+			}
+		}
+
+		for (var i = 0; i < programs.length; i++)
+			if (!ns.fileExists(programs[i]) && ns.getHackingLevel() >= levels[i]) {
+				ns.createProgram(programs[i], focus())
+				while (ns.isBusy())
 					await ns.sleep(1000)
 			}
 	}
