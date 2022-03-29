@@ -18,3 +18,13 @@ Sessionx.vim
 tags
 # Persistent undo
 [._]*.un~
+
+# Ignore all
+*
+#
+# # Unignore all with extensions
+!*.*
+#
+# # Unignore all dirs
+!*/
+#
