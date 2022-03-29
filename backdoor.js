@@ -2,25 +2,22 @@
 import { getAllServers, root } from "helper-functions.js";
 export async function main(ns) {
 
-	var allServers = []
+	let allServers = ns.getPurchasedServers()
 
-	async function recurBackdoor(home) {
-		if (!ns.hasRootAccess(home))
-			root(ns, home)
-		if (!ns.getServer(home).backdoorInstalled 
-			&& ns.getServerRequiredHackingLevel(home) <= ns.getHackingLevel())
+	async function recurBackdoor(currentServer) {
+		if (!ns.hasRootAccess(currentServer))
+			root(ns, currentServer)
+		if (!ns.getServer(currentServer).backdoorInstalled
+			&& ns.getServerRequiredHackingLevel(currentServer) <= ns.getHackingLevel())
 			await ns.installBackdoor()
-		var nearServers = ns.scan(home)
-		for (var i = 0; i < nearServers.length; i++)
-			if (!allServers.includes(nearServers[i])
-				&& !ns.getPurchasedServers().includes(nearServers[i])
-				&& nearServers[i] !== "home") {
-				allServers.push(nearServers[i])
-				ns.connect(nearServers[i])
-				await recurBackdoor(nearServers[i])
-				ns.connect(home)
+		let nearServers = ns.scan(currentServer)
+		for (let server of nearServers)
+			if (!allServers.includes(server)) {
+				allServers.push(server)
+				ns.connect(server)
+				await recurBackdoor(server)
+				ns.connect(currentServer)
 			}
 	}
-
 	await recurBackdoor(ns.getHostname())
 }
