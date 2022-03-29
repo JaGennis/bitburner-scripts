@@ -1,6 +1,7 @@
 #!/usr/bin/env runhaskell
 import Control.Arrow      ( (&&&), first )
 import Data.Bool          ( bool )
+import Data.Char          ( isDigit )
 import Data.List          ( subsequences )
 import System.Environment ( getArgs )
 import Control.Parallel.Strategies
@@ -27,10 +28,14 @@ buildNbsPairs trans priceList = buildNbsPairs (pred trans) priceList >>= mmm
     where mmm (pairs,priceList) = map (first (pairs ++)) $ findBuySellPair priceList
 
 maxProfit :: Int -> PriceList -> Int
-maxProfit n pl = maximum $ map (negate. sum . map (uncurry (-)) . fst) $ concatMap (\x -> buildNbsPairs x pl) w
-    --where w = if n == -1 then [1..div (length pl) 2] else [n]
-    --where w = [1..div (length pl) 2]
-    where w = [1..n]
+maxProfit n pl = maximum $ takeWhileSorted $ map maximum $ filter (not.null) $ map (map (negate. sum . map (uncurry (-)) . fst)) $ map (\x -> buildNbsPairs x pl) w
+    where w = if n == -1 then reverse [1..(length pl)] else reverse [1..n]
+
+takeWhileSorted :: Ord a => [a] -> [a]
+takeWhileSorted [x] = [x]
+takeWhileSorted (x:xs:xss)
+    | x < xs = x : takeWhileSorted (xs:xss)
+    | otherwise = [x]
 
 main = do
     input <- getArgs
