@@ -6,7 +6,7 @@ export async function main(ns) {
 	while (true) {
 
 		while (ns.getPurchasedServers().length < ns.getPurchasedServerLimit()) {
-			let ram = 8
+			let ram = 32
 			while (ns.getServerMoneyAvailable("home") > ns.getPurchasedServerCost(ram * 2) && ram <= 2048)
 				ram *= 2
 			ns.purchaseServer(serverName, ram)
