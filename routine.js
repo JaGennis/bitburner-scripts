@@ -1,6 +1,8 @@
 /** @param {NS} ns **/
 export async function main(ns) {
 
+	ns.disableLog("ALL")
+
 	async function crime() {
 
 		function moneyPerSec(crime) {
@@ -16,8 +18,7 @@ export async function main(ns) {
 		//		, "Traffick illegal Arms", "Homicide", "Grand theft Auto", "Kidnap and Ransom"
 		//		, "Assassinate", "Heist"]
 
-		var crimes = ["Assassination"]
-		// var crimes = ["Shoplift"]
+		var crimes = ["Mug someone"]
 
 		var bestCrime = crimes[0]
 
@@ -30,28 +31,19 @@ export async function main(ns) {
 	}
 
 	async function program() {
-		var programs = ["BruteSSH.exe", "FTPCrack.exe", "relaySMTP.exe", "HTTPWorm.exe", "SQLInject.exe",
-			"DeepscanV1.exe", "DeepscanV2.exe", "ServerProfiler.exe", "AutoLink.exe"]
-		var levels = [50, 100, 250, 500, 750, 75, 400, 75, 25]
-
-		if (ns.getServerMoneyAvailable("home") >= 200000 && !ns.getPlayer().tor)
+		if (ns.getServerMoneyAvailable("home") >= 200000 && !ns.getPlayer().tor) {
 			ns.purchaseTor()
-
-		if (ns.getPlayer().tor) {
-			for (var i = 0; i < ns.getDarkwebPrograms().length; i++) {
-				var programCost = ns.getDarkwebProgramCost(ns.getDarkwebPrograms()[i])
-				if (!ns.fileExists(ns.getDarkwebPrograms()[i]) && programCost <= ns.getServerMoneyAvailable("home")) {
-					ns.purchaseProgram(ns.getDarkwebPrograms()[i])
-				}
-			}
+			ns.print("Bought Tor server")
 		}
 
-		for (var i = 0; i < programs.length; i++)
-			if (!ns.fileExists(programs[i]) && ns.getHackingLevel() >= levels[i]) {
-				ns.createProgram(programs[i], focus())
-				while (ns.isBusy())
-					await ns.sleep(1000)
-			}
+		if (ns.getPlayer().tor) {
+			for (let program of ns.getDarkwebPrograms())
+				if (!ns.fileExists(program)
+					&& ns.getDarkwebProgramCost(program) <= ns.getServerMoneyAvailable("home")) {
+					ns.purchaseProgram(program)
+					ns.print("Bought program " + program)
+				}
+		}
 	}
 
 	async function faction() {
@@ -64,42 +56,135 @@ export async function main(ns) {
 			return Math.pow(1.02, (favor - 1)) * 25500 - 25000
 		}
 
-		var invitations = ns.checkFactionInvitations()
-		for (var i = 0; i < invitations.length; i++) {
-			var factionAugs = ns.getAugmentationsFromFaction(invitations[i])
-			var ownedAugs = ns.getOwnedAugmentations()
-			var unownedAugs = factionAugs.filter(aug => !ownedAugs.includes(aug))
-			if (unownedAugs.length > 0)
-				ns.joinFaction(invitations[i])
+		// function hasUnownedAugs(faction) {
+		// return ns.getAugmentationsFromFaction(faction)
+		// .filter(aug => !ns.getOwnedAugmentations().includes(aug))
+		// .length > 0
+		// }
+
+		function isInterestingFaction(faction) {
+			const reachableAugs = [... new Set(
+				ns.getPlayer()
+					.factions
+					.map(fac => ns.getAugmentationsFromFaction(fac))
+					.flat(Infinity))]
+
+			return ns.getAugmentationsFromFaction(faction)
+				.filter(aug => !ns.getOwnedAugmentations().includes(aug))
+				.filter(aug => !reachableAugs.includes(aug))
+				.length > 0
+				&& !ns.checkFactionInvitations().includes(faction)
 		}
 
+		function getLowestCombatStat() {
+			const p = ns.getPlayer()
+			return Math.min(p.strength, p.defense, p.dexterity, p.agility)
+		}
+
+		for (let faction of ns.checkFactionInvitations())
+			if (isInterestingFaction(faction)) {
+				ns.joinFaction(faction)
+				ns.print("Joined faction " + faction)
+			}
+
 		var cityFactions = ["Sector-12", "Chongqing", "New Tokyo", "Ishima", "Aevum", "Volhaven"]
-		for (var i = 0; i < cityFactions.length; i++) {
-			var facAugs = (ns.getAugmentationsFromFaction(cityFactions[i])
-				.filter(aug => !ns.getOwnedAugmentations().includes(aug)))
-			if (facAugs.length > 0) {
-				ns.travelToCity(cityFactions[i])
+		// Implement join order
+		for (let faction of cityFactions) {
+			if (isInterestingFaction(faction)) {
+				ns.travelToCity(faction)
+				ns.print("Traveled to city " + faction)
 				break
 			}
 		}
 
 		var crimeFactions = ["Slum Snakes", "Tetrads", "Silhouette", "Speakers for the Dead", "The Dark Army", "The Syndicate"]
 
+		if (isInterestingFaction("Slum Snakes")) {
+			if (getLowestCombatStat < 30) {
+				ns.commitCrime("Mug someone")
+				ns.print("Commiting crimes for Slum Snakes")
+			}
+		}
+
+		if (isInterestingFaction("Tetrads")) {
+			if (getLowestCombatStat < 75) {
+				ns.commitCrime("Mug someone")
+				ns.print("Commiting crimes for Tetrads")
+			}
+			ns.travelToCity("Ishima")
+			ns.print("Traveled to Ishima")
+			while(isInterestingFaction("Tetrads")){
+				ns.print("Waiting for invitation to arrive")
+				ns.print("Commiting crimes for Tetrads")
+				ns.commitCrime("Homicide")
+			}
+		}
+
+		if (isInterestingFaction("Speakers for the Dead")) {
+			if (getLowestCombatStat < 300) {
+				ns.commitCrime("Mug someone")
+				ns.print("Commiting crimes for Speakers for the Dead")
+			}
+			if (ns.getPlayer().numPeopleKilled < 30) {
+				ns.commitCrime("Homicide")
+				ns.print("Commiting crimes for Speakers for the Dead")
+			}
+		}
+
+		if (isInterestingFaction("The Dark Army")) {
+			if (getLowestCombatStat < 300) {
+				ns.commitCrime("Mug someone")
+				ns.print("Commiting crimes for The Dark Army")
+			}
+			if (ns.getPlayer().numPeopleKilled < 5) {
+				ns.commitCrime("Homicide")
+				ns.print("Commiting crimes for The Dark Army")
+			}
+			ns.travelToCity("Chongqing")
+			ns.print("Traveled to Chongqing")
+			while(isInterestingFaction("The Dark Army")){
+				ns.print("Waiting for invitation to arrive")
+				ns.print("Commiting crimes for The Dark Army")
+				ns.commitCrime("Homicide")
+			}
+		}
+
+		if (isInterestingFaction("The Syndicate")) {
+			if (getLowestCombatStat < 200) {
+				ns.commitCrime("Mug someone")
+				ns.print("Commiting crimes for The Dark Army")
+			}
+			ns.travelToCity("Sector-12")
+			ns.print("Traveled to Sector-12")
+			while(isInterestingFaction("The Syndicate")){
+				ns.print("Waiting for invitation to arrive")
+				ns.print("Commiting crimes for The Syndicate")
+				ns.commitCrime("Homicide")
+			}
+		}
+
+		// var boughtAugs = ["DataJack", "Neuralstimulator", "Embedded Netburner Module"]
+		var boughtAugs = []
+
 		var playerFactions = ns.getPlayer().factions
-		for (var i = 0; i < playerFactions.length; i++) {
-			var maxRep = Math.max(...ns.getAugmentationsFromFaction(playerFactions[i])
+		// playerFactions = playerFactions.filter(fac => fac !== "BitRunners")
+		for (let faction of ns.getPlayer().factions) {
+			// TODO: Filter buyable augs
+			var maxRep = Math.max(...ns.getAugmentationsFromFaction(faction)
 				.filter(aug => !ns.getOwnedAugmentations().includes(aug))
+				.filter(aug => !boughtAugs.includes(aug))
 				.map(aug => ns.getAugmentationRepReq(aug)))
-			if (maxRep > repNeededForFavor(150) + 110000 && ns.getFactionFavor(playerFactions[i]) < 150)
+			if (maxRep > repNeededForFavor(150) + 110000 && ns.getFactionFavor(faction) < 150)
 				var targetRep = repNeededForFavor(150)
 			else
 				var targetRep = maxRep
-			while (ns.getFactionRep(playerFactions[i]) < targetRep) {
-				if (ns.workForFaction(playerFactions[i], "Hacking Contracts", focus()))
+			if (ns.getFactionRep(faction) < targetRep) {
+				ns.print("Working for faction " + faction)
+				if (ns.workForFaction(faction, "Hacking Contracts", focus()))
 					await ns.sleep(10000)
-				else if (ns.workForFaction(playerFactions[i], "Field Work", focus()))
+				else if (ns.workForFaction(faction, "Field Work", focus()))
 					await ns.sleep(10000)
-				else if (ns.workForFaction(playerFactions[i], "Security Work", focus()))
+				else if (ns.workForFaction(faction, "Security Work", focus()))
 					await ns.sleep(10000)
 				else
 					break
@@ -112,6 +197,6 @@ export async function main(ns) {
 	while (true) {
 		await program()
 		await faction()
-		await crime()
+		// await crime()
 	}
 }
