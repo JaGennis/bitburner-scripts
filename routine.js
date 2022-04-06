@@ -91,11 +91,13 @@ export async function main(ns) {
 		for (let continent of continents) {
 			if (ns.getPlayer().factions.includes(continent[0]))
 				break
-			if (isInterestingFaction(continent[0])) {
+			if (isInterestingFaction(continent[0]) && ns.getServerMoneyAvailable("home") > 50200000) {
 				for (let city of continent) {
-					ns.travelToCity(city)
-					ns.print("Waiting for invitation of " + city)
-					await ns.sleep(10000)
+					ns.print("Traveled to city " + city)
+					if(ns.travelToCity(city)){
+						ns.print("Waiting for invitation of " + city)
+						await ns.sleep(10000)
+					}
 				}
 				break;
 			}
