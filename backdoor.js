@@ -4,14 +4,14 @@ export async function main(ns) {
 
 	let allServers = ns.getPurchasedServers()
 
+    // TODO : Make pure
 	async function recurBackdoor(currentServer) {
 		if (!ns.hasRootAccess(currentServer))
 			root(ns, currentServer)
 		if (!ns.getServer(currentServer).backdoorInstalled
 			&& ns.getServerRequiredHackingLevel(currentServer) <= ns.getHackingLevel())
 			await ns.installBackdoor()
-		let nearServers = ns.scan(currentServer)
-		for (let server of nearServers)
+		for (let server of ns.scan(currentServer))
 			if (!allServers.includes(server)) {
 				allServers.push(server)
 				ns.connect(server)
@@ -19,5 +19,6 @@ export async function main(ns) {
 				ns.connect(currentServer)
 			}
 	}
+
 	await recurBackdoor(ns.getHostname())
 }
