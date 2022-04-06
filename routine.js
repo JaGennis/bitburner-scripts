@@ -89,8 +89,10 @@ export async function main(ns) {
 		const continents = [["Sector-12", "Aevum"], ["Chongqing", "New Tokyo", "Ishima"], ["Volhaven"]]
 
 		for (let continent of continents) {
+			if (ns.getPlayer().factions.includes(continent[0]))
+				break
 			if (isInterestingFaction(continent[0])) {
-				for (let city in continent) {
+				for (let city of continent) {
 					ns.travelToCity(city)
 					ns.print("Waiting for invitation of " + city)
 					await ns.sleep(10000)
