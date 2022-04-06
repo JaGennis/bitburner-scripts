@@ -56,7 +56,7 @@ export async function main(ns) {
 			return Math.pow(1.02, (favor - 1)) * 25500 - 25000
 		}
 
-		function isInterestingFaction(faction) {
+		function hasInterestingAugs(faction) {
 			const reachableAugs = [... new Set(
 				ns.getPlayer()
 					.factions
@@ -67,7 +67,10 @@ export async function main(ns) {
 				.filter(aug => !ns.getOwnedAugmentations().includes(aug))
 				.filter(aug => !reachableAugs.includes(aug))
 				.length > 0
-				&& !ns.checkFactionInvitations().includes(faction)
+		}
+
+		function isInterestingFaction(faction) {
+			return hasInterestingAugs(faction) && !ns.checkFactionInvitations().includes(faction)
 		}
 
 		function getLowestCombatStat() {
@@ -75,11 +78,13 @@ export async function main(ns) {
 			return Math.min(p.strength, p.defense, p.dexterity, p.agility)
 		}
 
-		for (let faction of ns.checkFactionInvitations())
-			if (isInterestingFaction(faction)) {
+
+		for (let faction of ns.checkFactionInvitations()) {
+			if (hasInterestingAugs(faction)) {
 				ns.joinFaction(faction)
 				ns.print("Joined faction " + faction)
 			}
+		}
 
 		const continents = [["Sector-12", "Aevum"], ["Chongqing", "New Tokyo", "Ishima"], ["Volhaven"]]
 
@@ -104,21 +109,26 @@ export async function main(ns) {
 
 		for (let faction of crimeFactions) {
 			if (isInterestingFaction(faction.name)) {
-				if (getLowestCombatStat < faction.lowStat) {
+				if (getLowestCombatStat() < faction.lowStat) {
 					ns.commitCrime("Mug someone")
 					ns.print("Commiting crimes for " + faction.name)
+					await ns.sleep(ns.getCrimeStats("Mug someone").time)
 				}
 				if (ns.getPlayer().numPeopleKilled < faction.kills) {
 					ns.commitCrime("Homicide")
 					ns.print("Commiting crimes for " + faction.name)
+					await ns.sleep(ns.getCrimeStats("Homicide").time)
 				}
-				if (faction.city != null) {
+				if (faction.city != null
+					&& getLowestCombatStat() < faction.lowStat
+					&& ns.getPlayer().numPeopleKilled < faction.kills) {
 					ns.travelToCity(faction.city)
 					ns.print("Traveled to " + faction.city)
 					while (isInterestingFaction(faction.name)) {
 						ns.print("Waiting for invitation to arrive")
 						ns.print("Commiting crimes for " + faction.name)
 						ns.commitCrime("Homicide")
+						await ns.sleep(ns.getCrimeStats("Homicide").time)
 					}
 				}
 			}
@@ -134,9 +144,10 @@ export async function main(ns) {
 				faction = "Fulcrum Secret Technologies"
 			if (isInterestingFaction(faction)) {
 				ns.applyToCompany(company, "IT")
-				ns.print("Working for " + company)
-				ns.workForCompany(company, focus())
-				await ns.sleep(10000)
+				if (ns.workForCompany(company, focus())) {
+					ns.print("Working for " + company)
+					await ns.sleep(10000)
+				}
 			}
 		}
 
