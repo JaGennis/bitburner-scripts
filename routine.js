@@ -56,12 +56,6 @@ export async function main(ns) {
 			return Math.pow(1.02, (favor - 1)) * 25500 - 25000
 		}
 
-		// function hasUnownedAugs(faction) {
-		// return ns.getAugmentationsFromFaction(faction)
-		// .filter(aug => !ns.getOwnedAugmentations().includes(aug))
-		// .length > 0
-		// }
-
 		function isInterestingFaction(faction) {
 			const reachableAugs = [... new Set(
 				ns.getPlayer()
@@ -87,79 +81,62 @@ export async function main(ns) {
 				ns.print("Joined faction " + faction)
 			}
 
-		var cityFactions = ["Sector-12", "Chongqing", "New Tokyo", "Ishima", "Aevum", "Volhaven"]
-		// Implement join order
-		for (let faction of cityFactions) {
+		const continents = [["Sector-12", "Aevum"], ["Chongqing", "New Tokyo", "Ishima"], ["Volhaven"]]
+
+		for (let continent of continents) {
+			if (isInterestingFaction(continent[0])) {
+				for (let city in continent) {
+					ns.travelToCity(city)
+					ns.print("Waiting for invitation of " + city)
+					await ns.sleep(10000)
+				}
+				break;
+			}
+		}
+
+		const crimeFactions = [
+			{ name: "Slum Snakes", lowStat: 30, kills: 0 },
+			{ name: "Tetrads", lowStat: 75, kills: 0, city: "Ishima" },
+			{ name: "Speakers for the Dead", lowStat: 300, kills: 30 },
+			{ name: "The Dark Army", lowStat: 300, kills: 5, city: "Chongqing" },
+			{ name: "The Syndicate", lowStat: 200, kills: 0, city: "Sector-12" }
+		]
+
+		for (let faction of crimeFactions) {
+			if (isInterestingFaction(faction.name)) {
+				if (getLowestCombatStat < faction.lowStat) {
+					ns.commitCrime("Mug someone")
+					ns.print("Commiting crimes for " + faction.name)
+				}
+				if (ns.getPlayer().numPeopleKilled < faction.kills) {
+					ns.commitCrime("Homicide")
+					ns.print("Commiting crimes for " + faction.name)
+				}
+				if (faction.city != null) {
+					ns.travelToCity(faction.city)
+					ns.print("Traveled to " + faction.city)
+					while (isInterestingFaction(faction.name)) {
+						ns.print("Waiting for invitation to arrive")
+						ns.print("Commiting crimes for " + faction.name)
+						ns.commitCrime("Homicide")
+					}
+				}
+			}
+		}
+
+		const companies = ["ECorp", "MegaCorp", "KuaiGong International",
+			"Four Sigma", "NWO", "Blade Industries", "OmniTek Incorporated",
+			"Bachman & Associates", "Clarke Incorporated", "Fulcrum Technologies"]
+
+		for (let company of companies) {
+			let faction = company
+			if (company == "Fulcrum Technologies")
+				faction = "Fulcrum Secret Technologies"
 			if (isInterestingFaction(faction)) {
-				ns.travelToCity(faction)
-				ns.print("Traveled to city " + faction)
-				break
-			}
-		}
-
-		var crimeFactions = ["Slum Snakes", "Tetrads", "Silhouette", "Speakers for the Dead", "The Dark Army", "The Syndicate"]
-
-		if (isInterestingFaction("Slum Snakes")) {
-			if (getLowestCombatStat < 30) {
-				ns.commitCrime("Mug someone")
-				ns.print("Commiting crimes for Slum Snakes")
-			}
-		}
-
-		if (isInterestingFaction("Tetrads")) {
-			if (getLowestCombatStat < 75) {
-				ns.commitCrime("Mug someone")
-				ns.print("Commiting crimes for Tetrads")
-			}
-			ns.travelToCity("Ishima")
-			ns.print("Traveled to Ishima")
-			while(isInterestingFaction("Tetrads")){
-				ns.print("Waiting for invitation to arrive")
-				ns.print("Commiting crimes for Tetrads")
-				ns.commitCrime("Homicide")
-			}
-		}
-
-		if (isInterestingFaction("Speakers for the Dead")) {
-			if (getLowestCombatStat < 300) {
-				ns.commitCrime("Mug someone")
-				ns.print("Commiting crimes for Speakers for the Dead")
-			}
-			if (ns.getPlayer().numPeopleKilled < 30) {
-				ns.commitCrime("Homicide")
-				ns.print("Commiting crimes for Speakers for the Dead")
-			}
-		}
-
-		if (isInterestingFaction("The Dark Army")) {
-			if (getLowestCombatStat < 300) {
-				ns.commitCrime("Mug someone")
-				ns.print("Commiting crimes for The Dark Army")
-			}
-			if (ns.getPlayer().numPeopleKilled < 5) {
-				ns.commitCrime("Homicide")
-				ns.print("Commiting crimes for The Dark Army")
-			}
-			ns.travelToCity("Chongqing")
-			ns.print("Traveled to Chongqing")
-			while(isInterestingFaction("The Dark Army")){
-				ns.print("Waiting for invitation to arrive")
-				ns.print("Commiting crimes for The Dark Army")
-				ns.commitCrime("Homicide")
-			}
-		}
-
-		if (isInterestingFaction("The Syndicate")) {
-			if (getLowestCombatStat < 200) {
-				ns.commitCrime("Mug someone")
-				ns.print("Commiting crimes for The Dark Army")
-			}
-			ns.travelToCity("Sector-12")
-			ns.print("Traveled to Sector-12")
-			while(isInterestingFaction("The Syndicate")){
-				ns.print("Waiting for invitation to arrive")
-				ns.print("Commiting crimes for The Syndicate")
-				ns.commitCrime("Homicide")
+				ns.applyToCompany(company, "IT")
+				ns.print("Working for " + company)
+				ns.workForCompany(company, focus())
+				await ns.sleep(10000)
 			}
 		}
 
@@ -190,8 +167,6 @@ export async function main(ns) {
 					break
 			}
 		}
-
-		// var bestFactions = ["Bachman...", "Fulcrum"]
 	}
 
 	while (true) {
