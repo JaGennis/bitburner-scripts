@@ -3,6 +3,9 @@ export async function main(ns) {
 
 	ns.disableLog("ALL")
 
+	const workTime = 1000
+	const factionTime = 1000
+
 	async function crime() {
 
 		function moneyPerSec(crime) {
@@ -149,8 +152,8 @@ export async function main(ns) {
 			if (isInterestingFaction(faction)) {
 				ns.applyToCompany(company, "IT")
 				if (ns.workForCompany(company, focus())) {
-					ns.print("Working for " + company)
-					await ns.sleep(10000)
+					ns.print("Working for company " + company)
+					await ns.sleep(workTime)
 				}
 			}
 		}
@@ -173,11 +176,11 @@ export async function main(ns) {
 			if (ns.getFactionRep(faction) < targetRep) {
 				ns.print("Working for faction " + faction)
 				if (ns.workForFaction(faction, "Hacking Contracts", focus()))
-					await ns.sleep(10000)
+					await ns.sleep(factionTime)
 				else if (ns.workForFaction(faction, "Field Work", focus()))
-					await ns.sleep(10000)
+					await ns.sleep(factionTime)
 				else if (ns.workForFaction(faction, "Security Work", focus()))
-					await ns.sleep(10000)
+					await ns.sleep(factionTime)
 				else
 					break
 			}
