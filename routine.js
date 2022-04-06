@@ -122,8 +122,8 @@ export async function main(ns) {
 					await ns.sleep(ns.getCrimeStats("Homicide").time)
 				}
 				if (faction.city != null
-					&& getLowestCombatStat() < faction.lowStat
-					&& ns.getPlayer().numPeopleKilled < faction.kills) {
+					&& getLowestCombatStat() >= faction.lowStat
+					&& ns.getPlayer().numPeopleKilled >= faction.kills) {
 					ns.travelToCity(faction.city)
 					ns.print("Traveled to " + faction.city)
 					while (isInterestingFaction(faction.name)) {
