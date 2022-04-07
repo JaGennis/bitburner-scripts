@@ -3,6 +3,9 @@ export async function main(ns) {
 
 	ns.disableLog("ALL")
 
+	const workTime = 1000
+	const factionTime = 1000
+
 	async function crime() {
 
 		function moneyPerSec(crime) {
@@ -89,11 +92,15 @@ export async function main(ns) {
 		const continents = [["Sector-12", "Aevum"], ["Chongqing", "New Tokyo", "Ishima"], ["Volhaven"]]
 
 		for (let continent of continents) {
-			if (isInterestingFaction(continent[0])) {
-				for (let city in continent) {
-					ns.travelToCity(city)
-					ns.print("Waiting for invitation of " + city)
-					await ns.sleep(10000)
+			if (ns.getPlayer().factions.includes(continent[0]))
+				break
+			if (isInterestingFaction(continent[0]) && ns.getServerMoneyAvailable("home") > 50200000) {
+				for (let city of continent) {
+					ns.print("Traveled to city " + city)
+					if(ns.travelToCity(city)){
+						ns.print("Waiting for invitation of " + city)
+						await ns.sleep(10000)
+					}
 				}
 				break;
 			}
@@ -120,8 +127,8 @@ export async function main(ns) {
 					await ns.sleep(ns.getCrimeStats("Homicide").time)
 				}
 				if (faction.city != null
-					&& getLowestCombatStat() < faction.lowStat
-					&& ns.getPlayer().numPeopleKilled < faction.kills) {
+					&& getLowestCombatStat() >= faction.lowStat
+					&& ns.getPlayer().numPeopleKilled >= faction.kills) {
 					ns.travelToCity(faction.city)
 					ns.print("Traveled to " + faction.city)
 					while (isInterestingFaction(faction.name)) {
@@ -145,8 +152,8 @@ export async function main(ns) {
 			if (isInterestingFaction(faction)) {
 				ns.applyToCompany(company, "IT")
 				if (ns.workForCompany(company, focus())) {
-					ns.print("Working for " + company)
-					await ns.sleep(10000)
+					ns.print("Working for company " + company)
+					await ns.sleep(workTime)
 				}
 			}
 		}
@@ -169,11 +176,11 @@ export async function main(ns) {
 			if (ns.getFactionRep(faction) < targetRep) {
 				ns.print("Working for faction " + faction)
 				if (ns.workForFaction(faction, "Hacking Contracts", focus()))
-					await ns.sleep(10000)
+					await ns.sleep(factionTime)
 				else if (ns.workForFaction(faction, "Field Work", focus()))
-					await ns.sleep(10000)
+					await ns.sleep(factionTime)
 				else if (ns.workForFaction(faction, "Security Work", focus()))
-					await ns.sleep(10000)
+					await ns.sleep(factionTime)
 				else
 					break
 			}
