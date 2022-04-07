@@ -48,6 +48,10 @@ export async function main(ns) {
 				newWeakenThreads++
 
 			var stolenPercent = ns.hackAnalyze(ns.args[0]) * metaHack.threads
+			if (stolenPercent > 1) {
+				metaHack.threads--;
+				break
+			}
 			var newGrowThreads = Math.ceil(ns.growthAnalyze(ns.args[0], 1 / (1 - stolenPercent), cores))
 
 			var growSecIncrease = ns.growthAnalyzeSecurity(newGrowThreads)
