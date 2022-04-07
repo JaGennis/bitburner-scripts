@@ -41,7 +41,7 @@ export async function main(ns) {
 			await ns.sleep(1000)
 
 		metaWeak.threads = 1
-		
+
 		await ns.sleep(500)
 	}
 
@@ -77,5 +77,7 @@ export async function main(ns) {
 
 		metaWeak.threads = 1
 		metaGrow.threads = 1
+
+        await ns.sleep(100)
 	}
 }
