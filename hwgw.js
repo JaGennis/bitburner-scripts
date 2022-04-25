@@ -86,5 +86,7 @@ export async function main(ns) {
 		await ns.sleep(sorted[2].time - sorted[3].time)
 		ns.exec(sorted[3].script, biggestServer, sorted[3].threads, ns.args[0])
 		await ns.sleep(sorted[3].time)
+
+		await ns.sleep(101)
 	}
 }
