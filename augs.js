@@ -10,5 +10,6 @@ export async function main(ns) {
 	const sortedAugs  = uniqueAugs.sort((a,b) => ns.getAugmentationPrice(a) - ns.getAugmentationPrice(b))
 	const unownedAugs = uniqueAugs.filter(aug => !ns.getOwnedAugmentations().includes(aug))
 	unownedAugs.map(aug => ns.tprint(aug + " : " + ns.getAugmentationPrice(aug) + " : "
-		+ allFactions.filter(fac => ns.getAugmentationsFromFaction(fac).includes(aug))))
+		+ allFactions.filter(fac => ns.getAugmentationsFromFaction(fac).includes(aug)
+				                 && ns.getAugmentationRepReq(aug) <= ns.getFactionRep(fac))))
 }
