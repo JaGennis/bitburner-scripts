@@ -55,10 +55,6 @@ export async function main(ns) {
 			return !ns.getOwnedAugmentations().includes("Neuroreceptor Management Implant")
 		}
 
-		function repNeededForFavor(favor) {
-			return Math.pow(1.02, (favor - 1)) * 25500 - 25000
-		}
-
 		function hasInterestingAugs(faction) {
 			const reachableAugs = [... new Set(
 				ns.getPlayer()
@@ -161,20 +157,13 @@ export async function main(ns) {
 			}
 		}
 
-		const boughtAugs = []
-
-		const playerFactions = ns.getPlayer().factions
 		for (let faction of ns.getPlayer().factions) {
 			// TODO: Filter buyable augs
 			const maxRep = Math.max(...ns.getAugmentationsFromFaction(faction)
 				.filter(aug => !ns.getOwnedAugmentations().includes(aug))
-				.filter(aug => !boughtAugs.includes(aug))
 				.map(aug => ns.getAugmentationRepReq(aug)))
-			if (maxRep > repNeededForFavor(150) + 110000 && ns.getFactionFavor(faction) < 150)
-				var targetRep = repNeededForFavor(150)
-			else
-				var targetRep = maxRep
-			if (ns.getFactionRep(faction) < targetRep) {
+			if (ns.getFactionFavor(faction) + ns.getFactionFavorGain(faction) < 150
+					&& ns.getFactionRep(faction) < maxRep){
 				ns.print("Working for faction " + faction + " for " + factionTime/1000 + " seconds")
 				if (ns.workForFaction(faction, "Hacking Contracts", focus()))
 					await ns.sleep(factionTime)
