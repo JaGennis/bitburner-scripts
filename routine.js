@@ -75,6 +75,13 @@ export async function main(ns) {
 		}
 	}
 
+    function upgradeHome() {
+        if (ns.getServerMoneyAvailable("home") >= ns.getUpgradeHomeRamCost())
+            ns.upgradeHomeRam()
+        if (ns.getServerMoneyAvailable("home") >= ns.getUpgradeHomeCoresCost())
+            ns.upgradeHomeCores()
+    }
+
 	function checkInvitations() {
 		for (let faction of ns.checkFactionInvitations()) {
 			if (hasInterestingAugs(faction)) {
@@ -138,7 +145,7 @@ export async function main(ns) {
 				}
 			}
 		}
-	}	
+	}
 
 	async function companyFaction() {
 		const allCompanies = ["ECorp", "MegaCorp", "KuaiGong International",
@@ -185,6 +192,7 @@ export async function main(ns) {
 
 	while (true) {
 		buyPrograms()
+        upgradeHome()
 		checkInvitations()
 		await cityFaction()
 		await companyFaction()
