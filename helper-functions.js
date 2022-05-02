@@ -48,6 +48,14 @@ export function getAllServers(ns) {
 	return allServers
 }
 
+export function getBestServer(ns) {
+	return getAllServers(ns).filter(server => ns.hasRootAccess(server))
+			.sort(function (a, b) { return getFreeRam(ns, b) - getFreeRam(ns, a)})[0]
+}
+
+export function getFreeRam(ns, server) {
+	return ns.getServerMaxRam(server) - ns.getServerUsedRam(server)
+}
 
 export async function main(ns) {
 

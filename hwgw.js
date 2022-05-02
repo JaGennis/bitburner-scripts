@@ -1,42 +1,27 @@
 /** @param {NS} ns **/
-import { getAllServers } from "helper-functions.js";
+import { getBestServer, getFreeRam } from "helper-functions.js";
 export async function main(ns) {
 
-	function hackAnalyzeSecurity(i) {
-		return i * 0.002
-	}
-
-	function weakenAnalyze(i) {
-		return i * 0.05
-	}
+	const delay = 200
+	const targetServer = ns.args[0]
 
 	while (true) {
 
-		var delay = 200
+		let metaHack  = {time:ns.getHackTime(targetServer) + (delay*3), threads:1, script:"/hwgw/hack.js"}
+		let metaWeak  = {time:ns.getWeakenTime(targetServer) + (delay*2), threads:1, script:"/hwgw/weaken.js"}
+		let metaGrow  = {time:ns.getGrowTime(targetServer) + delay, threads:1, script:"/hwgw/grow.js"}
+		let metaWeak2 = {time:ns.getWeakenTime(targetServer), threads:1, script:"/hwgw/weaken2.js"}
 
-		var metaHack  = {time:ns.getHackTime(ns.args[0]) + (delay*3), threads:1, script:"/hwgw/hack.js"}
-		var metaWeak  = {time:ns.getWeakenTime(ns.args[0]) + (delay*2), threads:1, script:"/hwgw/weaken.js"}
-		var metaGrow  = {time:ns.getGrowTime(ns.args[0]) + delay, threads:1, script:"/hwgw/grow.js"}
-		var metaWeak2 = {time:ns.getWeakenTime(ns.args[0]), threads:1, script:"/hwgw/weaken2.js"}
+		const bestServer = getBestServer(ns)
+		const cores = ns.getServer(bestServer).cores
 
-		function getFreeRam(server){
-			return ns.getServerMaxRam(server) - ns.getServerUsedRam(server)
-		}
+		ns.print("Best Server: " + bestServer + " with " + getFreeRam(ns, bestServer) + " RAM")
 
-		var biggestServer = getAllServers(ns)
-			.filter(item => ns.hasRootAccess(item)
-						&& !ns.scriptRunning("/hwgw/weaken2.js", item)
-						&& item !== "home")
-			.sort(function (a, b) { return getFreeRam(b) - getFreeRam(a)})[0]
-
-		ns.print("Biggest Server: " + biggestServer + " with " + getFreeRam(biggestServer) + " RAM")
-
-		await ns.scp(metaHack.script, biggestServer)
-		await ns.scp(metaWeak.script, biggestServer)
-		await ns.scp(metaGrow.script, biggestServer)
-		await ns.scp(metaWeak2.script, biggestServer)
-
-		var cores = ns.getServer(biggestServer).cores
+		await ns.scp(metaHack.script, bestServer)
+		await ns.scp(metaWeak.script, bestServer)
+		await ns.scp(metaGrow.script, bestServer)
+		await ns.scp(metaWeak2.script, bestServer)
+		await ns.scp("/hwgw/dummy.js", bestServer)
 
 		while (true) {
 
@@ -47,12 +32,12 @@ export async function main(ns) {
 			while (hackSecIncrease - ns.weakenAnalyze(newWeakenThreads, cores) > 0)
 				newWeakenThreads++
 
-			var stolenPercent = ns.hackAnalyze(ns.args[0]) * metaHack.threads
+			var stolenPercent = ns.hackAnalyze(targetServer) * metaHack.threads
 			if (stolenPercent > 1) {
 				metaHack.threads--;
 				break
 			}
-			var newGrowThreads = Math.ceil(ns.growthAnalyze(ns.args[0], 1 / (1 - stolenPercent), cores))
+			var newGrowThreads = Math.ceil(ns.growthAnalyze(targetServer, 1 / (1 - stolenPercent), cores))
 
 			var growSecIncrease = ns.growthAnalyzeSecurity(newGrowThreads)
 			var newWeaken2Threads = metaWeak2.threads
@@ -64,7 +49,7 @@ export async function main(ns) {
 				+ ns.getScriptRam(metaWeak.script) * newWeakenThreads
 				+ ns.getScriptRam(metaGrow.script) * newGrowThreads
 				+ ns.getScriptRam(metaWeak2.script) * newWeaken2Threads
-				> getFreeRam(biggestServer))
+				> getFreeRam(ns, bestServer))
 				break
 			else {
 				metaHack.threads  = newHackThreads
@@ -76,15 +61,23 @@ export async function main(ns) {
 
 		var sorted = [metaHack, metaWeak, metaGrow, metaWeak2].sort(function (a, b) { return b.time - a.time})
 
-		ns.print(sorted)
+		const dummyPID1 = ns.exec("/hwgw/dummy.js", bestServer, sorted[1].threads, targetServer + "-0")
+		const dummyPID2 = ns.exec("/hwgw/dummy.js", bestServer, sorted[2].threads, targetServer + "-1")
+		const dummyPID3 = ns.exec("/hwgw/dummy.js", bestServer, sorted[3].threads, targetServer + "-2")
 
-		ns.exec(sorted[0].script, biggestServer, sorted[0].threads, ns.args[0])
+		ns.exec(sorted[0].script, bestServer, sorted[0].threads, targetServer)
 		await ns.sleep(sorted[0].time - sorted[1].time)
-		ns.exec(sorted[1].script, biggestServer, sorted[1].threads, ns.args[0])
+
+		ns.kill(dummyPID1)
+		ns.exec(sorted[1].script, bestServer, sorted[1].threads, targetServer)
 		await ns.sleep(sorted[1].time - sorted[2].time)
-		ns.exec(sorted[2].script, biggestServer, sorted[2].threads, ns.args[0])
+
+		ns.kill(dummyPID2)
+		ns.exec(sorted[2].script, bestServer, sorted[2].threads, targetServer)
 		await ns.sleep(sorted[2].time - sorted[3].time)
-		ns.exec(sorted[3].script, biggestServer, sorted[3].threads, ns.args[0])
+
+		ns.kill(dummyPID3)
+		ns.exec(sorted[3].script, bestServer, sorted[3].threads, targetServer)
 		await ns.sleep(sorted[3].time)
 
 		await ns.sleep(101)

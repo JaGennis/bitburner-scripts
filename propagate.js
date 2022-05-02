@@ -1,49 +1,52 @@
 /** @param {NS} ns **/
-import { getAvailHacks, getAvailThreads, getAllServers, root } from "helper-functions.js";
+import { getAvailHacks, getAllServers, root } from "helper-functions.js";
 
 export async function main(ns) {
 
 	ns.disableLog("ALL")
 
-	var allServers = getAllServers(ns).slice(1).filter(item => !ns.getPurchasedServers().includes(item))
+	const allServers = getAllServers(ns).slice(1)
+						.filter(item => !ns.getPurchasedServers().includes(item))
 
 	while (true) {
 
-		for (var i = 0; i < allServers.length; i++) {
+		for (let server of allServers) {
 
-			if (ns.getServerRequiredHackingLevel(allServers[i]) > ns.getHackingLevel())
-				ns.print("Server " + allServers[i] + " hacking level is "
-					+ ns.getServerRequiredHackingLevel(allServers[i]) + " and therefore too high!")
-			else if (ns.isRunning("hwgw.js", ns.getHostname(), allServers[i]))
-				ns.print("hwgw.js already running for the server " + allServers[i])
-			else if (!ns.isRunning("hwgw.js", ns.getHostname(), allServers[i])) {
+			if (ns.getServerRequiredHackingLevel(server) > ns.getHackingLevel())
+				ns.print("Server " + server + " hacking level is "
+					+ ns.getServerRequiredHackingLevel(server) + " and therefore too high!")
+			else if (ns.isRunning("hwgw.js", ns.getHostname(), server))
+				ns.print("hwgw.js already running for the server " + server)
+			else if (!ns.isRunning("hwgw.js", ns.getHostname(), server)) {
 
-				if (!ns.hasRootAccess(allServers[i])) {
-					if (ns.getServerNumPortsRequired(allServers[i]) <= getAvailHacks(ns)) {
-						root(ns, allServers[i]);
-						ns.print("Rooted " + allServers[i])
+				if (!ns.hasRootAccess(server)) {
+					if (ns.getServerNumPortsRequired(server) <= getAvailHacks(ns)) {
+						root(ns, server)
+						ns.print("Rooted " + server)
 					}
 					else
-						ns.print("Server " + allServers[i] + " needs " + ns.getServerNumPortsRequired(allServers[i])
+						ns.print("Server " + server + " needs " + ns.getServerNumPortsRequired(server)
 							+ " open ports but only " + getAvailHacks(ns) + " can be opened!")
 				}
 
-				if (ns.hasRootAccess(allServers[i])) {
+				if (ns.hasRootAccess(server)) {
 
-					if (ns.getServerMaxMoney(allServers[i]) > 0) {
-						ns.print("Stabilize " + allServers[i])
-						ns.run("stabilize.js", 1, allServers[i])
-
-						while (ns.scriptRunning("stabilize.js", ns.getHostname()))
-							await ns.sleep(1000);
-
-						ns.print("Stabilized " + allServers[i])
-
-						ns.print("Starting hwgw.js for " + allServers[i])
-						ns.run("hwgw.js", 1, allServers[i])
+					if (ns.getServerMaxMoney(server) > 0){
+						if (!ns.isRunning("stabilize.js", ns.getHostname(), server)) {
+							while (ns.getServerMaxRam(ns.getHostname()) - ns.getServerUsedRam(ns.getHostname())
+									< ns.getScriptRam("stabilize.js") + ns.getScriptRam("/hwgw/weaken.js") 
+									+ ns.getScriptRam("/hwgw/grow.js")){
+								ns.print("Waiting for free RAM...")
+								await ns.sleep(1000)
+							}
+							ns.print("Stabilizing " + server)
+							ns.run("stabilize.js", 1, server)
+						}
+						else 
+							ns.print("stabilize.js is already running for server " + server)
 					}
 					else
-						ns.print("Server " + allServers[i] + " has only " + ns.getServerMaxMoney(allServers[i]) + " money")
+						ns.print("Server " + server + " has only " + ns.getServerMaxMoney(server) + " money")
 				}
 			}
 			await ns.sleep(1000)

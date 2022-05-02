@@ -1,48 +1,53 @@
 /** @param {NS} ns **/
-import { getAllServers, getAvailThreads } from "helper-functions.js";
+import { getBestServer, getFreeRam } from "helper-functions.js";
 export async function main(ns) {
 
 	const delay = 200
 	const targetServer = ns.args[0]
 
-	let metaWeak = { time: ns.getWeakenTime(targetServer)	  , threads: 1, script: "/hwgw/weaken.js" }
-	let metaGrow = { time: ns.getGrowTime(targetServer) + delay, threads: 1, script: "/hwgw/grow.js" }
-
-	function getFreeRam(server) {
-		return ns.getServerMaxRam(server) - ns.getServerUsedRam(server)
-	}
-
-	const cores = ns.getServer(ns.getHostname()).cores
-
 	while (ns.getServerSecurityLevel(targetServer) > ns.getServerMinSecurityLevel(targetServer)) {
+
+		const bestServer = getBestServer(ns)
+		const cores = ns.getServer(bestServer).cores
+
+		ns.print("Best Server: " + bestServer + " with " + getFreeRam(ns, bestServer) + " RAM")
+
+		let metaWeak = { time: ns.getWeakenTime(targetServer), threads: 1, script: "/hwgw/weaken.js" }
+
+		await ns.scp(metaWeak.script, bestServer)
 
 		let newWeakenThreads = metaWeak.threads
 
 		while (ns.getServerSecurityLevel(targetServer) - ns.weakenAnalyze(metaWeak.threads, cores)
 				> ns.getServerMinSecurityLevel(targetServer)){
 			newWeakenThreads++
-			if (ns.getScriptRam(metaWeak.script) * newWeakenThreads > getFreeRam(ns.getHostname())) {
+			if (ns.getScriptRam(metaWeak.script) * newWeakenThreads > getFreeRam(ns, bestServer))
 				break
-			}
-			else {
+			else 
 				metaWeak.threads = newWeakenThreads
-			}
 		}
 
 		ns.run(metaWeak.script, metaWeak.threads, targetServer)
-		while (ns.scriptRunning(metaWeak.script, ns.getHostname()))
-			await ns.sleep(1000)
+		await ns.sleep(ns.getWeakenTime(targetServer))
 
-		metaWeak.threads = 1
-
-		await ns.sleep(500)
+		await ns.sleep(100)
 	}
 
 	while (ns.getServerMaxMoney(targetServer) > ns.getServerMoneyAvailable(targetServer)) {
-		metaWeak = { time: ns.getWeakenTime(targetServer), threads: 1, script: "/hwgw/weaken.js" }
-		metaGrow = { time: ns.getGrowTime(targetServer) + delay, threads: 1, script: "/hwgw/grow.js" }
 
-		const percentNeeded = 1 / (ns.getServerMoneyAvailable(targetServer) / ns.getServerMaxMoney(targetServer))
+		const bestServer = getBestServer(ns)
+		const cores = ns.getServer(bestServer).cores
+
+		ns.print("Best Server: " + bestServer + " with " + getFreeRam(ns, bestServer) + " RAM")
+
+		let metaWeak = { time: ns.getWeakenTime(targetServer), threads: 1, script: "/hwgw/weaken.js" }
+		let metaGrow = { time: ns.getGrowTime(targetServer) + delay, threads: 1, script: "/hwgw/grow.js" }
+
+		await ns.scp(metaWeak.script, bestServer)
+		await ns.scp(metaGrow.script, bestServer)
+		await ns.scp("/hwgw/dummy.js", bestServer)
+
+		const percentNeeded = 1 / ((1 + ns.getServerMoneyAvailable(targetServer)) / ns.getServerMaxMoney(targetServer))
 		while (metaGrow.threads < ns.growthAnalyze(targetServer, percentNeeded, cores)) {
 			let newGrowThreads = metaGrow.threads + 1
 			const growSecIncrease = ns.growthAnalyzeSecurity(newGrowThreads)
@@ -53,7 +58,7 @@ export async function main(ns) {
 
 			if (ns.getScriptRam(metaWeak.script) * newWeakenThreads
 				+ ns.getScriptRam(metaGrow.script) * newGrowThreads
-				> getFreeRam(ns.getHostname()))
+				> getFreeRam(ns, bestServer))
 				break
 			else {
 				metaWeak.threads = newWeakenThreads
@@ -63,14 +68,19 @@ export async function main(ns) {
 
 		const sorted = [metaWeak, metaGrow].sort(function (a, b) { return b.time - a.time })
 
-		ns.run(sorted[0].script, sorted[0].threads, targetServer)
-		await ns.sleep(sorted[0].time - sorted[1].time)
-		ns.run(sorted[1].script, sorted[1].threads, targetServer)
-		await ns.sleep(sorted[1].time)
+		const dummyPID = ns.exec("/hwgw/dummy.js", bestServer, sorted[1].threads, targetServer)
 
-		metaWeak.threads = 1
-		metaGrow.threads = 1
+		ns.exec(sorted[0].script, bestServer, sorted[0].threads, targetServer)
+		await ns.sleep(sorted[0].time - sorted[1].time)
+		
+		ns.kill(dummyPID)
+		ns.exec(sorted[1].script, bestServer, sorted[1].threads, targetServer)
+		await ns.sleep(sorted[1].time)
 
 		await ns.sleep(100)
 	}
+
+	while (getFreeRam(ns, ns.getHostname()) < ns.getScriptRam("hwgw.js"))
+		await ns.sleep(100)
+	ns.spawn("hwgw.js", 1, targetServer)
 }
