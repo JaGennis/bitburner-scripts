@@ -6,6 +6,32 @@ export async function main(ns) {
 	const workTime = 2000
 	const factionTime = 10000
 
+	function focus() {
+		return !ns.getOwnedAugmentations().includes("Neuroreceptor Management Implant")
+	}
+
+	function hasInterestingAugs(faction) {
+		const reachableAugs = [... new Set(
+			ns.getPlayer()
+				.factions
+				.map(fac => ns.getAugmentationsFromFaction(fac))
+				.flat(Infinity))]
+
+		return ns.getAugmentationsFromFaction(faction)
+			.filter(aug => !ns.getOwnedAugmentations().includes(aug))
+			.filter(aug => !reachableAugs.includes(aug))
+			.length > 0
+	}
+
+	function isInterestingFaction(faction) {
+		return hasInterestingAugs(faction) && !ns.checkFactionInvitations().includes(faction)
+	}
+
+	function getLowestCombatStat() {
+		const p = ns.getPlayer()
+		return Math.min(p.strength, p.defense, p.dexterity, p.agility)
+	}
+
 	async function crime() {
 
 		function moneyPerSec(crime) {
@@ -33,7 +59,7 @@ export async function main(ns) {
 		await ns.sleep(ns.getCrimeStats(bestCrime).time)
 	}
 
-	async function program() {
+	function buyPrograms() {
 		if (ns.getServerMoneyAvailable("home") >= 200000 && !ns.getPlayer().tor) {
 			ns.purchaseTor()
 			ns.print("Bought Tor server")
@@ -49,48 +75,22 @@ export async function main(ns) {
 		}
 	}
 
-	async function faction() {
-
-		function focus() {
-			return !ns.getOwnedAugmentations().includes("Neuroreceptor Management Implant")
-		}
-
-		function hasInterestingAugs(faction) {
-			const reachableAugs = [... new Set(
-				ns.getPlayer()
-					.factions
-					.map(fac => ns.getAugmentationsFromFaction(fac))
-					.flat(Infinity))]
-
-			return ns.getAugmentationsFromFaction(faction)
-				.filter(aug => !ns.getOwnedAugmentations().includes(aug))
-				.filter(aug => !reachableAugs.includes(aug))
-				.length > 0
-		}
-
-		function isInterestingFaction(faction) {
-			return hasInterestingAugs(faction) && !ns.checkFactionInvitations().includes(faction)
-		}
-
-		function getLowestCombatStat() {
-			const p = ns.getPlayer()
-			return Math.min(p.strength, p.defense, p.dexterity, p.agility)
-		}
-
-
+	function checkInvitations() {
 		for (let faction of ns.checkFactionInvitations()) {
 			if (hasInterestingAugs(faction)) {
 				ns.joinFaction(faction)
 				ns.print("Joined faction " + faction)
 			}
 		}
+	}
 
+	async function cityFaction() {
 		const continents = [["Sector-12", "Aevum"], ["Chongqing", "New Tokyo", "Ishima"], ["Volhaven"]]
 
 		for (let continent of continents) {
 			if (ns.getPlayer().factions.includes(continent[0]))
 				break
-			if (isInterestingFaction(continent[0]) && ns.getServerMoneyAvailable("home") > 50200000) {
+			if (continent.some(isInterestingFaction) && ns.getServerMoneyAvailable("home") > 50200000) {
 				for (let city of continent) {
 					ns.print("Traveled to city " + city)
 					if(ns.travelToCity(city)){
@@ -101,7 +101,9 @@ export async function main(ns) {
 				break;
 			}
 		}
+	}
 
+	async function crimeFaction(){
 		const crimeFactions = [
 			{ name: "Slum Snakes", lowStat: 30, kills: 0 },
 			{ name: "Tetrads", lowStat: 75, kills: 0, city: "Ishima" },
@@ -136,8 +138,9 @@ export async function main(ns) {
 				}
 			}
 		}
+	}	
 
-
+	async function companyFaction() {
 		const allCompanies = ["ECorp", "MegaCorp", "KuaiGong International",
 			"Four Sigma", "NWO", "Blade Industries", "OmniTek Incorporated",
 			"Bachman & Associates", "Clarke Incorporated", "Fulcrum Technologies"]
@@ -156,6 +159,9 @@ export async function main(ns) {
 				}
 			}
 		}
+	}
+
+	async function factionWork() {
 
 		for (let faction of ns.getPlayer().factions) {
 			// TODO: Filter buyable augs
@@ -178,8 +184,12 @@ export async function main(ns) {
 	}
 
 	while (true) {
-		await program()
-		await faction()
+		buyPrograms()
+		checkInvitations()
+		await cityFaction()
+		await companyFaction()
+		await crimeFaction()
+		await factionWork()
 		// await crime()
 	}
 }
