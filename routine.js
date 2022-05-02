@@ -3,8 +3,8 @@ export async function main(ns) {
 
 	ns.disableLog("ALL")
 
-	const workTime = 1000
-	const factionTime = 1000
+	const workTime = 2000
+	const factionTime = 10000
 
 	async function crime() {
 
@@ -141,9 +141,12 @@ export async function main(ns) {
 			}
 		}
 
-		const companies = ["ECorp", "MegaCorp", "KuaiGong International",
+
+		const allCompanies = ["ECorp", "MegaCorp", "KuaiGong International",
 			"Four Sigma", "NWO", "Blade Industries", "OmniTek Incorporated",
 			"Bachman & Associates", "Clarke Incorporated", "Fulcrum Technologies"]
+		const favCompanies = ["ECorp", "Bachman & Associates"]
+		const companies = favCompanies.some(isInterestingFaction) ? favCompanies : allCompanies
 
 		for (let company of companies) {
 			let faction = company
@@ -152,20 +155,18 @@ export async function main(ns) {
 			if (isInterestingFaction(faction)) {
 				ns.applyToCompany(company, "IT")
 				if (ns.workForCompany(company, focus())) {
-					ns.print("Working for company " + company)
+					ns.print("Working for company " + company + " for " + workTime/1000 + " seconds")
 					await ns.sleep(workTime)
 				}
 			}
 		}
 
-		// var boughtAugs = ["DataJack", "Neuralstimulator", "Embedded Netburner Module"]
-		var boughtAugs = []
+		const boughtAugs = []
 
-		var playerFactions = ns.getPlayer().factions
-		// playerFactions = playerFactions.filter(fac => fac !== "BitRunners")
+		const playerFactions = ns.getPlayer().factions
 		for (let faction of ns.getPlayer().factions) {
 			// TODO: Filter buyable augs
-			var maxRep = Math.max(...ns.getAugmentationsFromFaction(faction)
+			const maxRep = Math.max(...ns.getAugmentationsFromFaction(faction)
 				.filter(aug => !ns.getOwnedAugmentations().includes(aug))
 				.filter(aug => !boughtAugs.includes(aug))
 				.map(aug => ns.getAugmentationRepReq(aug)))
@@ -174,7 +175,7 @@ export async function main(ns) {
 			else
 				var targetRep = maxRep
 			if (ns.getFactionRep(faction) < targetRep) {
-				ns.print("Working for faction " + faction)
+				ns.print("Working for faction " + faction + " for " + factionTime/1000 + " seconds")
 				if (ns.workForFaction(faction, "Hacking Contracts", focus()))
 					await ns.sleep(factionTime)
 				else if (ns.workForFaction(faction, "Field Work", focus()))
