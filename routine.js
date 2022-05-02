@@ -151,7 +151,7 @@ export async function main(ns) {
 		const allCompanies = ["ECorp", "MegaCorp", "KuaiGong International",
 			"Four Sigma", "NWO", "Blade Industries", "OmniTek Incorporated",
 			"Bachman & Associates", "Clarke Incorporated", "Fulcrum Technologies"]
-		const favCompanies = ["ECorp", "Bachman & Associates"]
+		const favCompanies = ["Bachman & Associates", "ECorp","Fulcrum Technologies"]
 		const companies = favCompanies.some(isInterestingFaction) ? favCompanies : allCompanies
 
 		for (let company of companies) {
