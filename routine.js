@@ -150,14 +150,14 @@ export async function main(ns) {
 	async function companyFaction() {
 		const allCompanies = ["ECorp", "MegaCorp", "KuaiGong International",
 			"Four Sigma", "NWO", "Blade Industries", "OmniTek Incorporated",
-			"Bachman & Associates", "Clarke Incorporated", "Fulcrum Technologies"]
-		const favCompanies = ["Bachman & Associates", "ECorp","Fulcrum Technologies"]
+			"Bachman & Associates", "Clarke Incorporated", "Fulcrum Secret Technologies"]
+		const favCompanies = ["ECorp", "Bachman & Associates", "Fulcrum Secret Technologies"]
 		const companies = favCompanies.some(isInterestingFaction) ? favCompanies : allCompanies
 
 		for (let company of companies) {
 			let faction = company
-			if (company == "Fulcrum Technologies")
-				faction = "Fulcrum Secret Technologies"
+			if (faction == "Fulcrum Secret Technologies")
+				company = "Fulcrum Technologies"
 			if (isInterestingFaction(faction)) {
 				ns.applyToCompany(company, "IT")
 				if (ns.workForCompany(company, focus())) {
