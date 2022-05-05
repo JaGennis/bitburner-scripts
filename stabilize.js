@@ -10,24 +10,19 @@ export async function main(ns) {
 		const bestServer = getBestServer(ns)
 		const cores = ns.getServer(bestServer).cores
 
-		ns.print("Best Server: " + bestServer + " with " + getFreeRam(ns, bestServer) + " RAM")
+		ns.print("Best Server: " + bestServer + " with " + getFreeRam(ns, bestServer) + "GB RAM")
 
 		let metaWeak = { time: ns.getWeakenTime(targetServer), threads: 1, script: "/hwgw/weaken.js" }
 
 		await ns.scp(metaWeak.script, bestServer)
 
-		let newWeakenThreads = metaWeak.threads
-
-		while (ns.getServerSecurityLevel(targetServer) - ns.weakenAnalyze(metaWeak.threads, cores)
-				> ns.getServerMinSecurityLevel(targetServer)){
-			newWeakenThreads++
-			if (ns.getScriptRam(metaWeak.script) * newWeakenThreads > getFreeRam(ns, bestServer))
-				break
-			else 
-				metaWeak.threads = newWeakenThreads
+		while (ns.getServerSecurityLevel(targetServer) - ns.weakenAnalyze(metaWeak.threads+1, cores) 
+					> ns.getServerMinSecurityLevel(targetServer)
+				&& ns.getScriptRam(metaWeak.script) * (metaWeak.threads+1) < getFreeRam(ns, bestServer)){
+			metaWeak.threads++
 		}
 
-		ns.run(metaWeak.script, metaWeak.threads, targetServer)
+		ns.exec(metaWeak.script, bestServer, metaWeak.threads, targetServer)
 		await ns.sleep(ns.getWeakenTime(targetServer))
 
 		await ns.sleep(100)
