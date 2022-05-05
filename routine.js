@@ -199,5 +199,6 @@ export async function main(ns) {
 		await crimeFaction()
 		await factionWork()
 		// await crime()
+		await ns.sleep(100)
 	}
 }
