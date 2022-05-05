@@ -1,5 +1,5 @@
 /** @param {NS} ns **/
-import { getAvailHacks, getAllServers, root } from "helper-functions.js";
+import { getAvailHacks, getAllServers, getFreeRam, root } from "helper-functions.js";
 
 export async function main(ns) {
 
@@ -33,9 +33,7 @@ export async function main(ns) {
 
 					if (ns.getServerMaxMoney(server) > 0){
 						if (!ns.isRunning("stabilize.js", ns.getHostname(), server)) {
-							while (ns.getServerMaxRam(ns.getHostname()) - ns.getServerUsedRam(ns.getHostname())
-									< ns.getScriptRam("stabilize.js") + ns.getScriptRam("/hwgw/weaken.js") 
-									+ ns.getScriptRam("/hwgw/grow.js")){
+							while (getFreeRam(ns, ns.getHostname()) < ns.getScriptRam("stabilize.js")){
 								ns.print("Waiting for free RAM...")
 								await ns.sleep(1000)
 							}
