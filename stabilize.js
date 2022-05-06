@@ -77,5 +77,5 @@ export async function main(ns) {
 
 	while (getFreeRam(ns, ns.getHostname()) < ns.getScriptRam("hwgw.js"))
 		await ns.sleep(100)
-	ns.spawn("hwgw.js", 1, targetServer)
+	ns.exec("hwgw.js", ns.getHostname(), 1, targetServer)
 }
