@@ -35,7 +35,7 @@ export async function main(ns) {
 						if (!ns.isRunning("stabilize.js", ns.getHostname(), server)) {
 							while (getFreeRam(ns, ns.getHostname()) < ns.getScriptRam("stabilize.js")){
 								ns.print("Waiting for free RAM...")
-								await ns.sleep(1000)
+								await ns.sleep(50)
 							}
 							ns.print("Stabilizing " + server)
 							ns.run("stabilize.js", 1, server)
