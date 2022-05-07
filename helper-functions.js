@@ -1,4 +1,31 @@
 /** @param {NS} ns **/
+export function buyMax(ns, stockSym) {
+	const comissionFee = 100000
+	const availableShares = ns.stock.getMaxShares(stockSym) - ns.stock.getPosition(stockSym)[0]
+	let numShares = ns.getServerMoneyAvailable("home") / ns.stock.getAskPrice(stockSym)
+	numShares = Math.ceil(numShares/100) * 100
+	numShares = numShares > availableShares ? availableShares : numShares
+	while (ns.stock.getPurchaseCost(stockSym, numShares, "Long") > ns.getServerMoneyAvailable("home") 
+	    && ns.stock.getPurchaseCost(stockSym, numShares, "Long") > comissionFee * 100)
+		numShares -= 100
+
+	if ( 0 !== ns.stock.buy(stockSym, numShares))
+		ns.print("Bought " + numShares + " shares of " + stockSym)
+}
+
+export function shortMax(ns, stockSym) {
+	const comissionFee = 100000
+	const availableShares = ns.stock.getMaxShares(stockSym) - ns.stock.getPosition(stockSym)[0]
+	let numShares = ns.getServerMoneyAvailable("home") / ns.stock.getAskPrice(stockSym)
+	numShares = Math.ceil(numShares/100) * 100
+	numShares = numShares > availableShares ? availableShares : numShares
+	while (ns.stock.getPurchaseCost(stockSym, numShares, "Short") > ns.getServerMoneyAvailable("home") 
+	    && ns.stock.getPurchaseCost(stockSym, numShares, "Short") > comissionFee * 100)
+		numShares -= 100
+
+	if ( 0 !== ns.stock.short(stockSym, numShares))
+		ns.print("Shorted " + numShares + " shares of " + stockSym)
+}
 
 export function root(ns, server) {
 	if (ns.fileExists("BruteSSH.exe"))
