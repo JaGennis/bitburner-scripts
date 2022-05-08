@@ -29,7 +29,7 @@ export async function main(ns) {
 
 	async function growMax(targetServer, affectStock) {
 		if (ns.getServerMaxMoney(targetServer) == ns.getServerMoneyAvailable(targetServer))
-			hackMax(targetServer, false)
+			await hackMax(targetServer, false)
 
 		const delay = 200
 	
@@ -69,7 +69,7 @@ export async function main(ns) {
 
 	async function hackMax(targetServer, affectStock) {
 		if (ns.getServerMoneyAvailable(targetServer) <= 0)
-			growMax(targetServer, false)
+			await growMax(targetServer, false)
 
 		const delay = 200
 		let metaHack = {time:ns.getHackTime(targetServer) + delay, threads:1, script:"/hwgw/hack.js"}
@@ -103,7 +103,7 @@ export async function main(ns) {
 	
 		ns.kill(dummyPID)
 		ns.exec(sorted[1].script, bestServer, sorted[1].threads, targetServer)
-		await ns.sleep(sorted[1].time - sorted[2].time)
+		await ns.sleep(sorted[1].time)
 	}
 
 	const targetServer = ns.args[0]
@@ -121,7 +121,7 @@ export async function main(ns) {
 		buyMax(ns, stockSym)
 		await ns.sleep(6000)
 
-		while (ns.stock.getBidPrice(stockSym) < buyPrice * 1.10)
+		while (ns.stock.getBidPrice(stockSym) < buyPrice * 1.50)
 			await growMax(targetServer, true)
 
 		ns.stock.sell(stockSym, ns.stock.getPosition(stockSym)[0])
@@ -132,10 +132,10 @@ export async function main(ns) {
 		shortMax(ns, stockSym)
 		await ns.sleep(6000)
 
-		while (ns.stock.getAskPrice(stockSym) < sellPrice * 1.10)
+		while (ns.stock.getAskPrice(stockSym) < sellPrice * 1.50)
 			await hackMax(targetServer, true)
 
-		ns.stock.sellShort(stockSym, ns.stock.getPosition(stockSym)[0])
+		ns.stock.sellShort(stockSym, ns.stock.getPosition(stockSym)[2])
 
 		await ns.sleep(6000)
 	}
