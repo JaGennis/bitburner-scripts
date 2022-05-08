@@ -119,24 +119,26 @@ export async function main(ns) {
 	while (true) {
 		const buyPrice = ns.stock.getAskPrice(stockSym)
 		buyMax(ns, stockSym)
-		await ns.sleep(6000)
+		await ns.sleep(4000)
 
-		while (ns.stock.getBidPrice(stockSym) < buyPrice * 1.50)
+		while (ns.stock.getBidPrice(stockSym) < buyPrice * 1.30
+				&& ns.stock.getPosition(stockSym)[0] > 0)
 			await growMax(targetServer, true)
 
 		ns.stock.sell(stockSym, ns.stock.getPosition(stockSym)[0])
 
-		await ns.sleep(6000)
+		await ns.sleep(4000)
 		
 		const sellPrice = ns.stock.getBidPrice(stockSym)
 		shortMax(ns, stockSym)
-		await ns.sleep(6000)
+		await ns.sleep(4000)
 
-		while (ns.stock.getAskPrice(stockSym) < sellPrice * 1.50)
+		while (ns.stock.getAskPrice(stockSym) < sellPrice * 1.30
+				&& ns.stock.getPosition(stockSym)[2] > 0)
 			await hackMax(targetServer, true)
 
 		ns.stock.sellShort(stockSym, ns.stock.getPosition(stockSym)[2])
 
-		await ns.sleep(6000)
+		await ns.sleep(4000)
 	}
 }
